@@ -1,0 +1,92 @@
+int set_cell(global const int * mat, int rows,
+						 int cols, int m_cols, int m_rows, int cell)
+						 {
+							 #ifdef __llvm__
+							 #pragma GCC diagnostic ignored "-Wdangling-else"
+							 int cont=0;
+							 if(m_rows!=0){
+								 if(mat[((m_rows - 1)*cols) + m_cols] == 1){
+									 cont++;
+								 }
+								 if(mat[((m_rows - 1)*cols) + (m_cols + 1)] == 1){
+									 cont++;
+								 }
+								 if(mat[((m_rows - 1)*cols) + (m_cols - 1)] == 1){
+									 cont++;
+								 }
+							 }
+							 if(m_cols!=0){
+								 if(mat[(m_rows*cols) + (m_cols - 1)] == 1){
+									 cont++;
+								 }
+							 }
+							 if(m_rows < rows - 1){
+								 if(mat[((m_rows + 1)*cols) + m_cols] == 1){
+									 cont++;
+								 }
+								 if(mat[((m_rows + 1)*cols) + (m_cols - 1)] == 1){
+									 cont++;
+								 }
+								 if(mat[((m_rows + 1)*cols) + (m_cols + 1)] == 1){
+									 cont++;
+								 }
+							 }
+							 if(m_cols < cols - 1){
+								 if(mat[(m_rows*cols) + (m_cols + 1)] == 1){
+									 cont++;
+								 }
+							 }
+							 if(cell == 1){
+
+								 if(cont < 2 || cont > 3){
+									 return 0;
+								 }
+								 else{
+									 return 1;
+								 }
+							 }
+							 else{
+								 if(cont == 3){
+									 return 1;
+								 }
+								 else{
+									 return 0;
+								 }
+							 }
+							 #endif
+}
+
+kernel void init(global int * mat, int rows, int cols)
+{
+	// primo indice => colonne
+	int c = get_global_id(0);
+	// secondo indice => righe
+	int r = get_global_id(1);
+	if (r < rows && c < cols)
+	if(r == 1 && c == 7){
+		mat[r*cols + c] = 1;
+	}
+	else if(r == 3 && (c == 2 || (c > 5 && c < 9))){
+		mat[r*cols + c] = 1;
+	}
+	else if(r == 2 && (c == 1 || c == 2)){
+		mat[r*cols + c] = 1;
+	}
+	else{
+		mat[r*cols + c] = 0;
+	}
+}
+
+kernel void generation(
+	global int * restrict dst, /* matrice destinazione */
+	global const int * restrict src, /* matrice sorgente */
+	// righe e colonne della matrice src
+	int rows, int cols)
+	{
+		const int c = get_global_id(0);
+		const int r = get_global_id(1);
+
+		if (r < rows && c < cols)
+			dst[r*cols + c] = set_cell(src, rows, cols, c, r, src[r*cols + c]);
+		return;
+	}
