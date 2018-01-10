@@ -1,3 +1,11 @@
+#define ROWS_DIEHARD 5
+#define COLS_DIEHARD 10
+
+#define ROWS_GOSPER 11
+#define COLS_GOSPER 38
+
+#define GENER 130
+
 int error(const char *msg) {
 	fprintf(stderr, "%s\n", msg);
 	exit(1);
@@ -33,7 +41,7 @@ int lws_cli;
 size_t preferred_wg_init;
 cl_event init(cl_command_queue que,
 	cl_kernel init_k,
-	cl_mem d_mat, cl_int rows, cl_int cols)
+	cl_mem d_mat, cl_int rows, cl_int cols, cl_char init)
 {
 	size_t lws[] = { lws_cli };
 	/* se il local work size è stato specificato, arrotondiamo il
@@ -53,6 +61,8 @@ cl_event init(cl_command_queue que,
 	ocl_check(err, "set init arg 1");
 	err = clSetKernelArg(init_k, 2, sizeof(cols), &cols);
 	ocl_check(err, "set init arg 2");
+	err = clSetKernelArg(init_k, 3, sizeof(init), &init);
+	ocl_check(err, "set init arg 3");
 
 	err = clEnqueueNDRangeKernel(que, init_k,
 		2, NULL, gws, (lws_cli ? lws : NULL), /* griglia di lancio */
