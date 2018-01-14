@@ -4,6 +4,9 @@
 #define ROWS_GOSPER 11
 #define COLS_GOSPER 38
 
+#define ROWS_ACORN 5
+#define COLS_ACORN 9
+
 #define GENER 130
 
 int error(const char *msg) {

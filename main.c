@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	char init_c = 'g';
 
 	if(argc < 2){
-		error("USAGE: main <configuration: g | d> <rows> <cols> <generations>");
+		error("USAGE: main [configuration] [rows] [cols] [generations]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n1 - Other Configuration 1\n2 - Other Configuration 2\n3 - Other Configuration 3");
 	}
 
 	if(argc >= 2){
@@ -19,6 +19,11 @@ int main(int argc, char *argv[])
 			rows = ROWS_DIEHARD;
 			cols = COLS_DIEHARD;
 			init_c = 'd';
+		}
+		else if(*argv[1] == 'a'){
+			rows = ROWS_ACORN;
+			cols = COLS_ACORN;
+			init_c = 'a';
 		}
 	}
 	if (argc >= 3){
