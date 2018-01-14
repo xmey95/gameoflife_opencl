@@ -10,26 +10,29 @@ int main(int argc, char *argv[])
 	int gener = GENER;
 	char init_c = 'g';
 
-	if (argc == 5){
-		if(*argv[4] == 'd'){
+	if(argc < 2){
+		error("USAGE: main <configuration: g | d> <rows> <cols> <generations>");
+	}
+
+	if(argc >= 2){
+		if(*argv[1] == 'd'){
 			rows = ROWS_DIEHARD;
 			cols = COLS_DIEHARD;
 			init_c = 'd';
 		}
-		rows = atoi(argv[1]);
-		cols = atoi(argv[2]);
-		gener = atoi(argv[3]);
-		if(init_c == 'g'){
-			if (rows < ROWS_GOSPER || cols < COLS_GOSPER)
-				error("il numero di righe/colonne non e' sufficente(gosper)");
-		}
-		else{
-			if (rows < ROWS_DIEHARD || cols < COLS_DIEHARD)
-				error("il numero di righe/colonne non e' sufficente(diehard)");
+	}
+	if (argc >= 3){
+		if(atoi(argv[2]) > rows){
+			rows = atoi(argv[2]);
 		}
 	}
-	else {
-		error("USAGE: main <rows> <cols> <generations> <configuration: g | d>");
+	if (argc >= 4){
+		if(atoi(argv[3]) > cols){
+			cols = atoi(argv[3]);
+		}
+	}
+	if (argc >= 5){
+		gener = atoi(argv[4]);
 	}
 
 	const size_t memsize = sizeof(int)*rows*cols;
