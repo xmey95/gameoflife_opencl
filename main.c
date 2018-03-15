@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	char init_c = 'g';
 
 	if(argc < 2){
-		error("USAGE: main [configuration] [rows] [cols] [generations]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n1 - Other Configuration 1\n2 - Other Configuration 2\n3 - Other Configuration 3");
+		error("USAGE: main [configuration] [rows] [cols] [generations]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n");
 	}
 
 	if(argc >= 2){
@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
 	cl_mem d_dst = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 		memsize, NULL, &err);
 	ocl_check(err, "create buffer dst");
+	cl_mem tmp = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
+		memsize, NULL, &err);
+	ocl_check(err, "create buffer tmp");
 
 	cl_event init_evt = init(que, init_k, mat, rows, cols, init_c);
 
@@ -86,7 +89,9 @@ int main(int argc, char *argv[])
 		cl_event generation_evt = generation(que, generation_k,
 			d_dst, mat, rows, cols, init_evt);
 		print(rows, cols, d_dst, generation_evt, que, memsize, err);
+		tmp = mat;
 		mat = d_dst;
+		d_dst = tmp;
 		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
 		usleep(100000);

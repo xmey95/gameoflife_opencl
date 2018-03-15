@@ -1,9 +1,39 @@
 int set_cell(global const int * mat, int rows,
 						 int cols, int m_cols, int m_rows, int cell)
 						 {
-							 #ifdef __llvm__
-							 #pragma GCC diagnostic ignored "-Wdangling-else"
+
 							 int cont=0;
+							 int start_rows = -1;
+							 int start_cols = -1;
+							 int end_rows = 2;
+							 int end_cols = 2;
+
+							 if(m_rows == 0){
+								 start_rows = 0;
+							 }
+							 if(m_cols == 0){
+								 start_cols = 0;
+							 }
+							 if(m_rows == rows - 1){
+								 end_rows = 1;
+							 }
+							 if(m_cols == cols - 1){
+								 end_cols = 1;
+							 }
+
+							 for(int i = start_rows; i < end_rows; i++){
+								 for(int j = start_cols; j < end_cols; j++){
+									 	if(i == 0 && j == 0){
+											continue;
+										}
+										 if(mat[((m_rows + i)*cols) + (m_cols + j)] == 1){
+											 cont++;
+										 }
+								 }
+							 }
+
+							 /*#ifdef __llvm__
+							 #pragma GCC diagnostic ignored "-Wdangling-else"
 							 if(m_rows!=0){
 								 if(mat[((m_rows - 1)*cols) + m_cols] == 1){
 									 cont++;
@@ -35,7 +65,7 @@ int set_cell(global const int * mat, int rows,
 								 if(mat[(m_rows*cols) + (m_cols + 1)] == 1){
 									 cont++;
 								 }
-							 }
+							 }*/
 							 if(cell == 1){
 
 								 if(cont < 2 || cont > 3){
@@ -53,7 +83,7 @@ int set_cell(global const int * mat, int rows,
 									 return 0;
 								 }
 							 }
-							 #endif
+							 //#endif
 }
 
 void gosper_setup(global int * mat, int rows, int cols, int c, int r){
