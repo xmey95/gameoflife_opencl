@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 		gener = atoi(argv[4]);
 	}
 
-	const size_t memsize = sizeof(int)*rows*cols;
+	size_t memsize = sizeof(cl_int)*rows*cols;
 
 	/* Hic sunt leones */
 
@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
  	ocl_check(err, "create kernel init");
 	cl_kernel generation_k = clCreateKernel(prog, "generation", &err);
 	ocl_check(err, "create kernel generation");
+	cl_kernel expand_k = clCreateKernel(prog, "expand", &err);
+	ocl_check(err, "create kernel expand");
 
 	err = clGetKernelWorkGroupInfo(init_k, d,
 		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
@@ -65,6 +67,9 @@ int main(int argc, char *argv[])
 	err = clGetKernelWorkGroupInfo(generation_k, d,
 		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
 		sizeof(preferred_wg_generation), &preferred_wg_generation, NULL);
+	err = clGetKernelWorkGroupInfo(expand_k, d,
+		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
+		sizeof(preferred_wg_expand), &preferred_wg_expand, NULL);
 
 	cl_mem mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 			memsize, NULL, &err);
@@ -84,21 +89,43 @@ int main(int argc, char *argv[])
 	(2.0*memsize)/runtime_ns(init_evt));
 
 	for(int i = 1; i <= gener; i++){
+		cl_event initorexpand_evt = init_evt;
+		cl_event expand_evt;
+		if(i > 1){
+			initorexpand_evt = expand_evt;
+		}
 		system("clear");
 		printf("generazione %d\n\n", i);
 		cl_event generation_evt = generation(que, generation_k,
-			d_dst, mat, rows, cols, init_evt);
+			d_dst, mat, rows, cols, initorexpand_evt);
 		print(rows, cols, d_dst, generation_evt, que, memsize, err);
 		tmp = mat;
 		mat = d_dst;
 		d_dst = tmp;
 		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
+
+		rows++;
+		cols++;
+		memsize = sizeof(cl_int)*rows*cols;
+
+		cl_mem new_mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
+					memsize, NULL, &err);
+		ocl_check(err, "create buffer new_mat");
+
+
+		expand_evt = expand(que, expand_k,
+			new_mat, mat, rows, cols, generation_evt);
+		print(rows, cols, new_mat, expand_evt, que, memsize, err);
+
+		tmp = new_mat;
+		new_mat = mat;
+		mat = tmp;
+
+		printf("expand time:\t%gms\t%gGB/s\n\n", runtime_ms(expand_evt),
+		(2.0*memsize)/runtime_ns(expand_evt));
+		//creazione matrice più grande
 		usleep(100000);
-		/*
-		cl_event generation_evt = generation(que, generation_k,
-			d_dst, mat, rows, cols, init_evt);
-		*/
 	}
 
 	return 0;
