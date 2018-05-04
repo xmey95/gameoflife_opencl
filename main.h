@@ -118,7 +118,7 @@ cl_event generation(cl_command_queue que,
 size_t preferred_wg_expand;
 cl_event expand(cl_command_queue que,
 	cl_kernel expand_k,
-	cl_mem d_dst, cl_mem d_src,
+	cl_mem d_dst, cl_mem d_src, cl_mem d_sides,
 	cl_int s_rows, cl_int s_cols,
 	cl_event init_evt)
 {
@@ -134,10 +134,12 @@ cl_event expand(cl_command_queue que,
 	ocl_check(err, "set expand arg 0");
 	err = clSetKernelArg(expand_k, 1, sizeof(d_src), &d_src);
 	ocl_check(err, "set expand arg 1");
-	err = clSetKernelArg(expand_k, 2, sizeof(s_rows), &s_rows);
+	err = clSetKernelArg(expand_k, 2, sizeof(d_sides), &d_sides);
 	ocl_check(err, "set expand arg 2");
-	err = clSetKernelArg(expand_k, 3, sizeof(s_cols), &s_cols);
+	err = clSetKernelArg(expand_k, 3, sizeof(s_rows), &s_rows);
 	ocl_check(err, "set expand arg 3");
+	err = clSetKernelArg(expand_k, 4, sizeof(s_cols), &s_cols);
+	ocl_check(err, "set expand arg 4");
 
 	cl_event wait_list[] = { init_evt };
 	err = clEnqueueNDRangeKernel(que, expand_k,
@@ -147,4 +149,38 @@ cl_event expand(cl_command_queue que,
 	ocl_check(err, "enqueue kernel expand");
 
 	return expand_evt;
+}
+
+size_t preferred_wg_where_expand;
+cl_event where_expand(cl_command_queue que,
+	cl_kernel where_expand_k,
+	cl_mem d_src, cl_mem d_sides,
+	cl_int s_rows, cl_int s_cols,
+	cl_event generation_evt)
+{
+	size_t gws[] = {
+		round_mul_up(s_cols, preferred_wg_where_expand),
+		round_mul_up(s_rows, preferred_wg_where_expand),
+       	};
+	cl_event where_expand_evt;
+	cl_int err;
+
+	err = clSetKernelArg(where_expand_k, 0,
+		sizeof(d_src), &d_src);
+	ocl_check(err, "set where_expand arg 0");
+	err = clSetKernelArg(where_expand_k, 1, sizeof(d_sides), &d_sides);
+	ocl_check(err, "set where_expand arg 1");
+	err = clSetKernelArg(where_expand_k, 2, sizeof(s_rows), &s_rows);
+	ocl_check(err, "set where_expand arg 2");
+	err = clSetKernelArg(where_expand_k, 3, sizeof(s_cols), &s_cols);
+	ocl_check(err, "set where_expand arg 3");
+
+	cl_event wait_list[] = { generation_evt };
+	err = clEnqueueNDRangeKernel(que, where_expand_k,
+		2, NULL, gws, NULL, /* griglia di lancio */
+		1, wait_list, /* waiting list */
+		&where_expand_evt);
+	ocl_check(err, "enqueue kernel where_expand");
+
+	return where_expand_evt;
 }

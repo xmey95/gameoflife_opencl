@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 	ocl_check(err, "create kernel generation");
 	cl_kernel expand_k = clCreateKernel(prog, "expand", &err);
 	ocl_check(err, "create kernel expand");
+	cl_kernel where_expand_k = clCreateKernel(prog, "where_expand", &err);
+	ocl_check(err, "create kernel where_expand");
 
 	err = clGetKernelWorkGroupInfo(init_k, d,
 		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
@@ -70,6 +72,9 @@ int main(int argc, char *argv[])
 	err = clGetKernelWorkGroupInfo(expand_k, d,
 		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
 		sizeof(preferred_wg_expand), &preferred_wg_expand, NULL);
+	err = clGetKernelWorkGroupInfo(where_expand_k, d,
+		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
+		sizeof(preferred_wg_where_expand), &preferred_wg_where_expand, NULL);
 
 	cl_mem mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 			memsize, NULL, &err);
@@ -106,8 +111,30 @@ int main(int argc, char *argv[])
 		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
 
-		rows++;
-		cols++;
+		cl_int sides_init[4] = {0}; //sx,dx,up,dw
+		cl_mem sides = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+			sizeof(cl_int)*4, sides_init, &err);
+			ocl_check(err, "create buffer dst");
+
+		cl_event where_expand_evt = where_expand(que, where_expand_k,
+			mat, sides, rows, cols, generation_evt);
+
+		cl_event copy_evt;
+		int *sides_after = clEnqueueMapBuffer(que, sides, CL_TRUE,
+		    CL_MAP_READ, 0, sizeof(cl_int)*4,
+		    1, &where_expand_evt, &copy_evt, &err);
+		ocl_check(err, "read buffer");
+
+		printf("\n");
+		printf("copy sides time:\t%gms\t%gGB/s\n", runtime_ms(copy_evt),
+		  (2.0*memsize)/runtime_ns(copy_evt));
+
+		if(sides_after[0] == 1) cols++;
+		if(sides_after[1] == 1) cols++;
+		if(sides_after[2] == 1) rows++;
+		if(sides_after[3] == 1) rows++;
+
+
 		memsize = sizeof(int)*rows*cols;
 
 		cl_mem new_mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
@@ -118,7 +145,7 @@ int main(int argc, char *argv[])
 		printf("espansione %d\n\n", i);
 
 		expand_evt = expand(que, expand_k,
-			new_mat, mat, rows, cols, generation_evt);
+			new_mat, mat, sides, rows, cols, where_expand_evt);
 
 		print(rows, cols, new_mat, expand_evt, que, memsize, err);
 
