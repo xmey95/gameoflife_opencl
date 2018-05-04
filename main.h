@@ -14,6 +14,12 @@ int error(const char *msg) {
 	exit(1);
 }
 
+void swap(cl_mem mat1, cl_mem mat2, cl_mem tmp){
+	tmp = mat1;
+	mat1 = mat2;
+	mat2 = tmp;
+}
+
 void print(int rows, int cols, cl_mem mat, cl_event ev, cl_command_queue que, size_t memsize, cl_int err){
   cl_event copy_evt;
 
@@ -47,10 +53,6 @@ cl_event init(cl_command_queue que,
 	cl_mem d_mat, cl_int rows, cl_int cols, cl_char init)
 {
 	size_t lws[] = { lws_cli };
-	/* se il local work size è stato specificato, arrotondiamo il
-	 * global work size al multiplo successivo del lws, altrimenti,
-	 * lo arrotondiamo al multiplo successivo della base preferita
-	 * dalla piattaforma */
 	size_t gws[] = {
  		round_mul_up(cols, preferred_wg_init),
  		round_mul_up(rows, preferred_wg_init),

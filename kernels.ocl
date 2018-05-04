@@ -1,8 +1,9 @@
 #include "configurations.h"
 
-//Function for setting every cell of EcoSystem
-int set_cell_expand(global const int * mat, int rows,
-						 int cols, int m_cols, int m_rows, int cell)
+//Function for expand every cell of EcoSystem
+int set_cell_expand(int rows, int cols,
+										int m_cols, int m_rows,
+										int cell)
 						 {
 							 if(m_rows == rows - 1){
 								 return 0;
@@ -12,7 +13,7 @@ int set_cell_expand(global const int * mat, int rows,
 								 return 0;
 							 }
 
-							 return mat[(m_rows*cols) + m_cols];
+							 return cell;
 						 }
 
 //Function for setting every cell of EcoSystem
@@ -111,6 +112,6 @@ kernel void expand(
 		const int c = get_global_id(0);
 		const int r = get_global_id(1);
 		if (r < rows && c < cols)
-			dst[r*cols + c] = set_cell_expand(src, rows, cols, c, r, src[r*cols + c]);
+			dst[r*cols + c] = set_cell_expand(rows, cols, c, r, src[r*cols + c]);
 		return;
 	}

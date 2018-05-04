@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 		gener = atoi(argv[4]);
 	}
 
-	size_t memsize = sizeof(cl_int)*rows*cols;
+	size_t memsize = sizeof(int)*rows*cols;
 
 	/* Hic sunt leones */
 
@@ -74,9 +74,6 @@ int main(int argc, char *argv[])
 	cl_mem mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 			memsize, NULL, &err);
 	ocl_check(err, "create buffer");
-	cl_mem d_dst = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
-		memsize, NULL, &err);
-	ocl_check(err, "create buffer dst");
 	cl_mem tmp = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 		memsize, NULL, &err);
 	ocl_check(err, "create buffer tmp");
@@ -88,43 +85,50 @@ int main(int argc, char *argv[])
 	printf("init time:\t%gms\t%gGB/s\n\n", runtime_ms(init_evt),
 	(2.0*memsize)/runtime_ns(init_evt));
 
+	cl_event initorexpand_evt = init_evt;
+
 	for(int i = 1; i <= gener; i++){
-		cl_event initorexpand_evt = init_evt;
+		cl_mem d_dst = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
+			memsize, NULL, &err);
+			ocl_check(err, "create buffer dst");
+
 		cl_event expand_evt;
 		if(i > 1){
 			initorexpand_evt = expand_evt;
 		}
 		system("clear");
 		printf("generazione %d\n\n", i);
+
 		cl_event generation_evt = generation(que, generation_k,
 			d_dst, mat, rows, cols, initorexpand_evt);
+
 		print(rows, cols, d_dst, generation_evt, que, memsize, err);
-		tmp = mat;
-		mat = d_dst;
-		d_dst = tmp;
+
+		swap(mat, d_dst, tmp);
+
 		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
 
 		rows++;
 		cols++;
-		memsize = sizeof(cl_int)*rows*cols;
+		memsize = sizeof(int)*rows*cols;
 
 		cl_mem new_mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 					memsize, NULL, &err);
 		ocl_check(err, "create buffer new_mat");
 
+		system("clear");
+		printf("espansione %d\n\n", i);
 
 		expand_evt = expand(que, expand_k,
 			new_mat, mat, rows, cols, generation_evt);
+
 		print(rows, cols, new_mat, expand_evt, que, memsize, err);
 
-		tmp = new_mat;
-		new_mat = mat;
-		mat = tmp;
+		swap(new_mat, mat, tmp);
 
 		printf("expand time:\t%gms\t%gGB/s\n\n", runtime_ms(expand_evt),
 		(2.0*memsize)/runtime_ns(expand_evt));
-		//creazione matrice più grande
 		usleep(100000);
 	}
 
