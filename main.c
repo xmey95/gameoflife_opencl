@@ -74,9 +74,6 @@ int main(int argc, char *argv[])
 	cl_mem mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
 			memsize, NULL, &err);
 	ocl_check(err, "create buffer");
-	cl_mem tmp = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
-		memsize, NULL, &err);
-	ocl_check(err, "create buffer tmp");
 
 	cl_event init_evt = init(que, init_k, mat, rows, cols, init_c);
 
@@ -104,7 +101,7 @@ int main(int argc, char *argv[])
 
 		print(rows, cols, d_dst, generation_evt, que, memsize, err);
 
-		swap(mat, d_dst, tmp);
+		swap(&mat, &d_dst);
 
 		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
@@ -125,7 +122,7 @@ int main(int argc, char *argv[])
 
 		print(rows, cols, new_mat, expand_evt, que, memsize, err);
 
-		swap(new_mat, mat, tmp);
+		swap(&new_mat, &mat);
 
 		printf("expand time:\t%gms\t%gGB/s\n\n", runtime_ms(expand_evt),
 		(2.0*memsize)/runtime_ns(expand_evt));

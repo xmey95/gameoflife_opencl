@@ -109,12 +109,12 @@ kernel void generation(
 kernel void expand(
 	global int * restrict dst, /* matrice destinazione */
 	global const int * restrict src, /* matrice sorgente */
-	// righe e colonne della matrice src
+	// righe e colonne della matrice dst
 	int rows, int cols)
 	{
 		const int c = get_global_id(0);
 		const int r = get_global_id(1);
 		if (r < rows && c < cols)
-			dst[r*cols + c] = set_cell_expand(rows, cols, c, r, src[r*cols + c]);
+			dst[r*cols + c] = set_cell_expand(rows, cols, c, r, src[r*(cols - 1) + c]);
 		return;
 	}

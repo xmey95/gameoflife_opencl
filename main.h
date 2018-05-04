@@ -14,12 +14,15 @@ int error(const char *msg) {
 	exit(1);
 }
 
-void swap(cl_mem mat1, cl_mem mat2, cl_mem tmp){
-	tmp = mat1;
-	mat1 = mat2;
-	mat2 = tmp;
+void swap(cl_mem *mat1, cl_mem *mat2){
+	cl_mem tmp;
+
+	tmp = *mat1;
+	*mat1 = *mat2;
+	*mat2 = tmp;
 }
 
+char fmt[]=".*";
 void print(int rows, int cols, cl_mem mat, cl_event ev, cl_command_queue que, size_t memsize, cl_int err){
   cl_event copy_evt;
 
@@ -33,10 +36,10 @@ void print(int rows, int cols, cl_mem mat, cl_event ev, cl_command_queue que, si
 	for(int i = 0; i < rows*cols; i++){
 			if(numb == cols - 1){
 				numb = 0;
-				printf("%d\n", dst[i]);
+				printf("%c\n", fmt[dst[i]]);
 			}
 			else{
-				printf("%d", dst[i]);
+				printf("%c", fmt[dst[i]]);
 				numb++;
 			}
 	}
