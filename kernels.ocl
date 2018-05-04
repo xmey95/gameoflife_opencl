@@ -70,6 +70,7 @@ int set_cell(global const int * mat, int rows,
 							 }
 }
 
+//Init Kernel
 kernel void init(global int * mat, int rows, int cols, char init)
 {
 	// primo indice => colonne
@@ -89,6 +90,7 @@ kernel void init(global int * mat, int rows, int cols, char init)
 	}
 }
 
+//Generation Kernel
 kernel void generation(
 	global int * restrict dst, /* matrice destinazione */
 	global const int * restrict src, /* matrice sorgente */
@@ -103,6 +105,7 @@ kernel void generation(
 		return;
 	}
 
+//Expansion Kernel
 kernel void expand(
 	global int * restrict dst, /* matrice destinazione */
 	global const int * restrict src, /* matrice sorgente */
