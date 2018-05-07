@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
 	/* Hic sunt leones */
 
-	cl_platform_id p = select_platform();
+	cl_platform_id p = select_platform(0);
 	cl_device_id d = select_device(p);
 	cl_context ctx = create_context(p, d);
 	cl_command_queue que = create_queue(ctx, d);
@@ -108,6 +108,9 @@ int main(int argc, char *argv[])
 
 		swap(&mat, &d_dst);
 
+		err = clReleaseMemObject(d_dst);
+		ocl_check(err, "free buffer d_dst");
+
 		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
 
@@ -134,7 +137,6 @@ int main(int argc, char *argv[])
 		if(sides_after[2] == 1) rows++;
 		if(sides_after[3] == 1) rows++;
 
-
 		memsize = sizeof(int)*rows*cols;
 
 		cl_mem new_mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
@@ -150,6 +152,11 @@ int main(int argc, char *argv[])
 		print(rows, cols, new_mat, expand_evt, que, memsize, err);
 
 		swap(&new_mat, &mat);
+
+		err = clReleaseMemObject(new_mat);
+		ocl_check(err, "free buffer new_mat");
+		err = clReleaseMemObject(sides);
+		ocl_check(err, "free buffer sides");
 
 		printf("expand time:\t%gms\t%gGB/s\n\n", runtime_ms(expand_evt),
 		(2.0*memsize)/runtime_ns(expand_evt));
