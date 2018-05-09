@@ -110,6 +110,12 @@ int main(int argc, char *argv[])
 		cl_event generation_evt = generation(que, generation_k,
 			d_dst, mat, rows, cols, initorexpand_evt);
 
+		err = clWaitForEvents(1u, &generation_evt);
+		ocl_check(err, "clWaitForEvents");
+
+		printf("\nKERNEL GENERATION:\t%gms\t%gGB/s\n", runtime_ms(generation_evt),
+		(2.0*memsize)/runtime_ns(generation_evt));
+
 		dst = clEnqueueMapBuffer(que, mat, CL_TRUE,
 					CL_MAP_READ, 0, memsize,
 					1, &init_evt, NULL, &err);
@@ -120,9 +126,6 @@ int main(int argc, char *argv[])
 
 		err = clReleaseMemObject(d_dst);
 		ocl_check(err, "free buffer d_dst");
-
-		printf("\nKERNEL GENERATION:\t%gms\t%gGB/s\n", runtime_ms(generation_evt),
-			(2.0*memsize)/runtime_ns(generation_evt));
 
 		cl_int sides_init[4] = {0}; //sx,dx,up,dw
 		cl_mem sides = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
@@ -136,6 +139,9 @@ int main(int argc, char *argv[])
 		    CL_MAP_READ, 0, sizeof(cl_int)*4,
 		    1, &where_expand_evt, NULL, &err);
 		ocl_check(err, "read buffer");
+
+		err = clWaitForEvents(1u, &where_expand_evt);
+		ocl_check(err, "clWaitForEvents");
 
 		printf("KERNEL WHERE_EXPAND:\t%gms\t%gGB/s\n", runtime_ms(where_expand_evt),
 		  (2.0*memsize)/runtime_ns(where_expand_evt));
@@ -166,6 +172,8 @@ int main(int argc, char *argv[])
 		err = clReleaseMemObject(sides);
 		ocl_check(err, "free buffer sides");
 
+		err = clWaitForEvents(1u, &expand_evt);
+		ocl_check(err, "clWaitForEvents");
 		printf("KERNEL EXPAND:\t\t%gms\t%gGB/s\n", runtime_ms(expand_evt),
 		(2.0*memsize)/runtime_ns(expand_evt));
 
