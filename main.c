@@ -1,5 +1,6 @@
 #include "ocl_boiler.h"
 #include "main.h"
+#include "preferred_wg.h"
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -82,7 +83,17 @@ int main(int argc, char *argv[])
 
 	cl_event init_evt = init(que, init_k, mat, rows, cols, init_c);
 
-	print(rows, cols, mat, init_evt, que, memsize, err);
+	cl_event copy_evt;
+
+	int *dst = clEnqueueMapBuffer(que, mat, CL_TRUE,
+			CL_MAP_READ, 0, memsize,
+			1, &init_evt, &copy_evt, &err);
+	ocl_check(err, "read buffer");
+
+	print(dst, rows, cols);
+
+	printf("copy time:\t%gms\t%gGB/s\n", runtime_ms(copy_evt),
+	(2.0*memsize)/runtime_ns(copy_evt));
 
 	printf("init time:\t%gms\t%gGB/s\n\n", runtime_ms(init_evt),
 	(2.0*memsize)/runtime_ns(init_evt));
@@ -104,14 +115,22 @@ int main(int argc, char *argv[])
 		cl_event generation_evt = generation(que, generation_k,
 			d_dst, mat, rows, cols, initorexpand_evt);
 
-		print(rows, cols, d_dst, generation_evt, que, memsize, err);
+		dst = clEnqueueMapBuffer(que, mat, CL_TRUE,
+					CL_MAP_READ, 0, memsize,
+					1, &init_evt, &copy_evt, &err);
+		ocl_check(err, "read buffer");
+
+		printf("copy time:\t%gms\t%gGB/s\n", runtime_ms(copy_evt),
+		(2.0*memsize)/runtime_ns(copy_evt));
+
+		print(dst, rows, cols);
 
 		swap(&mat, &d_dst);
 
 		err = clReleaseMemObject(d_dst);
 		ocl_check(err, "free buffer d_dst");
 
-		printf("generation time:\t%gms\t%gGB/s\n\n", runtime_ms(generation_evt),
+		printf("\ngeneration time:\t%gms\t%gGB/s\n", runtime_ms(generation_evt),
 			(2.0*memsize)/runtime_ns(generation_evt));
 
 		cl_int sides_init[4] = {0}; //sx,dx,up,dw
@@ -122,13 +141,11 @@ int main(int argc, char *argv[])
 		cl_event where_expand_evt = where_expand(que, where_expand_k,
 			mat, sides, rows, cols, generation_evt);
 
-		cl_event copy_evt;
 		int *sides_after = clEnqueueMapBuffer(que, sides, CL_TRUE,
 		    CL_MAP_READ, 0, sizeof(cl_int)*4,
 		    1, &where_expand_evt, &copy_evt, &err);
 		ocl_check(err, "read buffer");
 
-		printf("\n");
 		printf("copy sides time:\t%gms\t%gGB/s\n", runtime_ms(copy_evt),
 		  (2.0*memsize)/runtime_ns(copy_evt));
 
@@ -143,13 +160,16 @@ int main(int argc, char *argv[])
 					memsize, NULL, &err);
 		ocl_check(err, "create buffer new_mat");
 
-		system("clear");
-		printf("espansione %d\n\n", i);
-
 		expand_evt = expand(que, expand_k,
 			new_mat, mat, sides, rows, cols, where_expand_evt);
 
-		print(rows, cols, new_mat, expand_evt, que, memsize, err);
+		dst = clEnqueueMapBuffer(que, new_mat, CL_TRUE,
+				CL_MAP_READ, 0, memsize,
+				1, &init_evt, &copy_evt, &err);
+		ocl_check(err, "read buffer");
+
+		printf("copy time:\t%gms\t%gGB/s\n", runtime_ms(copy_evt),
+		(2.0*memsize)/runtime_ns(copy_evt));
 
 		swap(&new_mat, &mat);
 
