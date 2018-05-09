@@ -1,25 +1,5 @@
 #include "configurations.h"
 
-//Function for expand every cell of EcoSystem
-/*int set_cell_expand(int rows, int cols,
-										int m_cols, int m_rows,
-										global const int * mat,
-										global const int * sides)
-						 {
-							 int src_cols = cols - 2;
-							 int src_r = m_rows - 1;
-							 int src_c = m_cols - 1;
-
-							 if(m_cols == 0) return 0;
-							 if(m_cols == cols - 1) return 0;
-							 if(m_rows == 0) return 0;
-							 if(m_rows == rows - 1) return 0;
-
-							 return mat[(src_r*src_cols) + src_c];
-						 }
-*/
-
-
 int set_cell_expand(int rows, int cols,
 										int m_cols, int m_rows,
 										global const int * mat,
