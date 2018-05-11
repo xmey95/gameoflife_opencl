@@ -95,27 +95,29 @@ kernel void where_expand(
 	// righe e colonne della matrice
 	int rows, int cols)
 	{
-		const int i = get_global_id(0);
-
-		if(i < cols){
-			if(mat[i] == 1){
-				sides[2] = 1;
-			}
-		}
-		if(i > cols - 1 && i < cols * 2){
-			if(mat[i] == 1){
-				sides[0] = 1;
-			}
-		}
-		if(i > (cols*2) - 1 && i < cols * 3){
-			if(mat[i] == 1){
-				sides[1] = 1;
-			}
-		}
-		if(i > (cols*3) - 1 && i < cols * 4){
-			if(mat[i] == 1){
-				sides[3] = 1;
-			}
+		const int c = get_global_id(0);
+		const int r = get_global_id(1);
+		if (r < rows && c < cols){
+				if(c == 0){
+					if(mat[r*cols + c] == 1){
+						sides[0] = 1;
+					}
+				}
+				else if(c == cols - 1){
+					if(mat[r*cols + c] == 1){
+						sides[1] = 1;
+					}
+				}
+				else if(r == 0){
+					if(mat[r*cols + c] == 1){
+						sides[2] = 1;
+					}
+				}
+				else if(r == rows - 1){
+					if(mat[r*cols + c] == 1){
+						sides[3] = 1;
+					}
+				}
 		}
 		return;
 	}
