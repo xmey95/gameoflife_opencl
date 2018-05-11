@@ -10,10 +10,11 @@ int main(int argc, char *argv[])
 	int cols = COLS_GOSPER;
 	int gener = GENER;
 	int method = 0;
+	int performance = 0;
 	char init_c = 'g';
 
 	if(argc < 2){
-		error("USAGE: main [configuration] [rows] [cols] [generations] [i]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n");
+		error("USAGE: main [configuration] [rows] [cols] [generations] [i] [p]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n");
 	}
 
 	if(argc >= 2){
@@ -44,6 +45,10 @@ int main(int argc, char *argv[])
 
 	if (argc >= 6 && *argv[5] == 'i'){
 		method = 1;
+	}
+
+	if (argc >= 7 && *argv[6] == 'p'){
+		performance = 1;
 	}
 
 	size_t memsize = sizeof(int)*rows*cols;
@@ -93,7 +98,7 @@ int main(int argc, char *argv[])
 			1, &init_evt, NULL, &err);
 	ocl_check(err, "read buffer");
 
-	print(dst, rows, cols);
+	if(!performance) print(dst, rows, cols);
 
 	printf("KERNEL INIT:\t%gms\t%gGB/s\n\n", runtime_ms(init_evt),
 	(2.0*memsize)/runtime_ns(init_evt));
@@ -110,7 +115,7 @@ int main(int argc, char *argv[])
 		if(i > 1){
 			initorexpand_evt = expand_evt;
 		}
-		system("clear");
+		if(!performance) system("clear");
 		printf("generazione %d\n\n", i);
 
 		cl_event generation_evt = generation(que, generation_k,
@@ -124,7 +129,7 @@ int main(int argc, char *argv[])
 					1, &init_evt, NULL, &err);
 		ocl_check(err, "read buffer");
 
-		print(dst, rows, cols);
+		if(!performance) print(dst, rows, cols);
 		swap(&mat, &d_dst);
 
 		err = clReleaseMemObject(d_dst);
