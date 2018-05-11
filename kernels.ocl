@@ -1,38 +1,5 @@
 #include "configurations.h"
 
-int set_cell_expand(int rows, int cols,
-										int m_cols, int m_rows,
-										global const int * mat,
-										global const int * sides)
-						 {
-							 int src_cols = cols;
-							 int src_r = m_rows;
-							 int src_c = m_cols;
-
-							 if(sides[0] == 1){
-								 if(m_cols == 0) return 0;
-								 src_cols--;
-								 src_c--;
-							 }
-
-							 if(sides[1] == 1){
-								 if(m_cols == cols - 1) return 0;
-								 src_cols--;
-							 }
-
-							 if(sides[2] == 1){
-								 if(m_rows == 0) return 0;
-								 src_r--;
-							 }
-
-							 if(sides[3] == 1){
-								 if(m_rows == rows - 1) return 0;
-							 }
-
-							 return mat[(src_r*src_cols) + src_c];
-						 }
-
-
 //Function for setting every cell of EcoSystem
 int set_cell(global const int * mat, int rows,
 						 int cols, int m_cols, int m_rows, int cell)
@@ -119,21 +86,6 @@ kernel void generation(
 
 		if (r < rows && c < cols)
 			dst[r*cols + c] = set_cell(src, rows, cols, c, r, src[r*cols + c]);
-		return;
-	}
-
-//Expansion Kernel
-kernel void expand(
-	global int * restrict dst, /* matrice destinazione */
-	global const int * restrict src, /* matrice sorgente */
-	global const int * restrict sides, /* array dei lati */
-	// righe e colonne della matrice dst
-	int rows, int cols)
-	{
-		const int c = get_global_id(0);
-		const int r = get_global_id(1);
-		if (r < rows && c < cols)
-			dst[r*cols + c] = set_cell_expand(rows, cols, c, r, src, sides);
 		return;
 	}
 

@@ -59,8 +59,6 @@ int main(int argc, char *argv[])
  	ocl_check(err, "create kernel init");
 	cl_kernel generation_k = clCreateKernel(prog, "generation", &err);
 	ocl_check(err, "create kernel generation");
-	cl_kernel expand_k = clCreateKernel(prog, "expand", &err);
-	ocl_check(err, "create kernel expand");
 	cl_kernel where_expand_k = clCreateKernel(prog, "where_expand", &err);
 	ocl_check(err, "create kernel where_expand");
 
@@ -70,9 +68,6 @@ int main(int argc, char *argv[])
 	err = clGetKernelWorkGroupInfo(generation_k, d,
 		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
 		sizeof(preferred_wg_generation), &preferred_wg_generation, NULL);
-	err = clGetKernelWorkGroupInfo(expand_k, d,
-		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
-		sizeof(preferred_wg_expand), &preferred_wg_expand, NULL);
 	err = clGetKernelWorkGroupInfo(where_expand_k, d,
 		CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
 		sizeof(preferred_wg_where_expand), &preferred_wg_where_expand, NULL);
@@ -101,6 +96,7 @@ int main(int argc, char *argv[])
 			ocl_check(err, "create buffer dst");
 
 		cl_event expand_evt;
+
 		if(i > 1){
 			initorexpand_evt = expand_evt;
 		}
@@ -113,8 +109,6 @@ int main(int argc, char *argv[])
 		err = clWaitForEvents(1u, &generation_evt);
 		ocl_check(err, "clWaitForEvents");
 
-		printf("\nKERNEL GENERATION:\t%gms\t%gGB/s\n", runtime_ms(generation_evt),
-		(2.0*memsize)/runtime_ns(generation_evt));
 
 		dst = clEnqueueMapBuffer(que, mat, CL_TRUE,
 					CL_MAP_READ, 0, memsize,
@@ -143,8 +137,11 @@ int main(int argc, char *argv[])
 		err = clWaitForEvents(1u, &where_expand_evt);
 		ocl_check(err, "clWaitForEvents");
 
-		printf("KERNEL WHERE_EXPAND:\t%gms\t%gGB/s\n", runtime_ms(where_expand_evt),
-		  (2.0*memsize)/runtime_ns(where_expand_evt));
+		int cols_src = cols;
+
+		size_t src_origin[3] = {0, 0, 0};
+    size_t dst_origin[3] = {sizeof(int)*sides_after[0], sides_after[2], 0};
+    size_t region[3] = {cols*sizeof(int), rows, 1};
 
 		if(sides_after[0] == 1) cols++;
 		if(sides_after[1] == 1) cols++;
@@ -153,27 +150,43 @@ int main(int argc, char *argv[])
 
 		memsize = sizeof(int)*rows*cols;
 
-		cl_mem new_mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE,
-					memsize, NULL, &err);
+		int *n_mat = (int *) malloc(sizeof(int) * rows * cols);
+
+		initialize_newmat(n_mat, rows, cols);
+
+		cl_mem new_mat = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+					memsize, n_mat, &err);
 		ocl_check(err, "create buffer new_mat");
 
-		expand_evt = expand(que, expand_k,
-			new_mat, mat, sides, rows, cols, where_expand_evt);
-
-		dst = clEnqueueMapBuffer(que, new_mat, CL_TRUE,
-				CL_MAP_READ, 0, memsize,
-				1, &init_evt, NULL, &err);
-		ocl_check(err, "read buffer");
+		err = clEnqueueCopyBufferRect(que,
+									mat,
+									new_mat,
+									src_origin,
+									dst_origin,
+									region,
+									cols_src * sizeof(int),
+									0,
+									cols * sizeof(int),
+									0,
+									1,
+									&where_expand_evt,
+									&expand_evt);
 
 		swap(&new_mat, &mat);
+
+		err = clWaitForEvents(1u, &expand_evt);
+		ocl_check(err, "clWaitForEvents");
 
 		err = clReleaseMemObject(new_mat);
 		ocl_check(err, "free buffer new_mat");
 		err = clReleaseMemObject(sides);
 		ocl_check(err, "free buffer sides");
 
-		err = clWaitForEvents(1u, &expand_evt);
-		ocl_check(err, "clWaitForEvents");
+
+		printf("\nKERNEL GENERATION:\t%gms\t%gGB/s\n", runtime_ms(generation_evt),
+		(10.0*memsize)/runtime_ns(generation_evt));
+		printf("KERNEL WHERE_EXPAND:\t%gms\t%gGB/s\n", runtime_ms(where_expand_evt),
+		(2.0*memsize)/runtime_ns(where_expand_evt));
 		printf("KERNEL EXPAND:\t\t%gms\t%gGB/s\n", runtime_ms(expand_evt),
 		(2.0*memsize)/runtime_ns(expand_evt));
 
