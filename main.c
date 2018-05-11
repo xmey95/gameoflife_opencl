@@ -126,8 +126,16 @@ int main(int argc, char *argv[])
 			sizeof(cl_int)*4, sides_init, &err);
 			ocl_check(err, "create buffer dst");
 
+		int *borders_host = (int*)malloc(sizeof(int)*((cols*2) + (rows * 2)));
+
+		createBufferBorders(borders_host, dst, rows, cols);
+
+		cl_mem borders = clCreateBuffer(ctx, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+			sizeof(int)*((cols*2) + (rows * 2)), borders_host, &err);
+			ocl_check(err, "create buffer borders");
+
 		cl_event where_expand_evt = where_expand(que, where_expand_k,
-			mat, sides, rows, cols, generation_evt);
+			borders, sides, rows, cols, generation_evt);
 
 		int *sides_after = clEnqueueMapBuffer(que, sides, CL_TRUE,
 		    CL_MAP_READ, 0, sizeof(cl_int)*4,
