@@ -64,7 +64,7 @@ void createBufferBorders(int *buffer, const int *mat, int rows, int cols){
 		j++;
 	}
 
-	for(int i = (rows * (cols - 1)); i < rows * cols; i++){
+	for(int i = (cols * (rows - 1)); i < rows * cols; i++){
 		buffer[j] = mat[i];
 		j++;
 	}
