@@ -1,6 +1,6 @@
 #include "ocl_boiler.h"
 #include "main.h"
-#include "preferred_wg.h"
+#include "events.h"
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	char init_c = 'g';
 
 	if(argc < 2){
-		error("USAGE: main [configuration] [rows] [cols] [generations] [i] [p]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n");
+		error("USAGE: main [configuration] [rows] [cols] [generations] [localsize] [i] [p]\n\nConfigurations:\ng - Gosper Cannon\nd - Diehard\na - Acorn\n");
 	}
 
 	if(argc >= 2){
@@ -43,11 +43,15 @@ int main(int argc, char *argv[])
 		gener = atoi(argv[4]);
 	}
 
-	if (argc >= 6 && *argv[5] == 'i'){
+	if (argc >= 6){
+		lws_cli = atoi(argv[5]);
+	}
+
+	if (argc >= 7 && *argv[6] == 'i'){
 		method = 1;
 	}
 
-	if (argc >= 7 && *argv[6] == 'p'){
+	if (argc >= 8 && *argv[7] == 'p'){
 		performance = 1;
 	}
 
@@ -122,7 +126,7 @@ int main(int argc, char *argv[])
 			d_dst, mat, rows, cols, initorexpand_evt);
 
 		err = clWaitForEvents(1u, &generation_evt);
-		ocl_check(err, "clWaitForEvents");
+		ocl_check(err, "clWaitForEvents1");
 
 		dst = clEnqueueMapBuffer(que, mat, CL_TRUE,
 					CL_MAP_READ, 0, memsize,
@@ -149,7 +153,7 @@ int main(int argc, char *argv[])
 		ocl_check(err, "read buffer");
 
 		err = clWaitForEvents(1u, &where_expand_evt);
-		ocl_check(err, "clWaitForEvents");
+		ocl_check(err, "clWaitForEvents2");
 
 		int cols_src = cols;
 
@@ -208,7 +212,7 @@ int main(int argc, char *argv[])
 		swap(&new_mat, &mat);
 
 		err = clWaitForEvents(1u, &expand_evt);
-		ocl_check(err, "clWaitForEvents");
+		ocl_check(err, "clWaitForEvents3");
 
 		err = clReleaseMemObject(new_mat);
 		ocl_check(err, "free buffer new_mat");

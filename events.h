@@ -5,7 +5,6 @@ cl_event init(cl_command_queue que,
 	cl_kernel init_k,
 	cl_mem d_mat, cl_int rows, cl_int cols, cl_char init)
 {
-	size_t lws[] = { lws_cli };
 	size_t gws[] = {
  		round_mul_up(cols, preferred_wg_init),
  		round_mul_up(rows, preferred_wg_init),
@@ -23,7 +22,7 @@ cl_event init(cl_command_queue que,
 	ocl_check(err, "set init arg 3");
 
 	err = clEnqueueNDRangeKernel(que, init_k,
-		2, NULL, gws, (lws_cli ? lws : NULL), /* griglia di lancio */
+		2, NULL, gws, NULL, /* griglia di lancio */
 		0, NULL, /* waiting list */
 		&init_evt);
 	ocl_check(err, "enqueue kernel init");
@@ -38,10 +37,11 @@ cl_event generation(cl_command_queue que,
 	cl_int s_rows, cl_int s_cols,
 	cl_event init_evt)
 {
+	size_t lws[] = { lws_cli, lws_cli };
 	size_t gws[] = {
-		round_mul_up(s_cols, preferred_wg_generation),
-		round_mul_up(s_rows, preferred_wg_generation),
-       	};
+ 		round_mul_up(s_cols, lws_cli ? lws[0] : preferred_wg_generation),
+ 		round_mul_up(s_rows, lws_cli ? lws[1] : preferred_wg_generation),
+  };
 	cl_event generation_evt;
 	cl_int err;
 
@@ -50,14 +50,16 @@ cl_event generation(cl_command_queue que,
 	ocl_check(err, "set generation arg 0");
 	err = clSetKernelArg(generation_k, 1, sizeof(d_src), &d_src);
 	ocl_check(err, "set generation arg 1");
-	err = clSetKernelArg(generation_k, 2, sizeof(s_rows), &s_rows);
+	err = clSetKernelArg(generation_k, 2, (lws[0]+2)*sizeof(cl_int), NULL);
 	ocl_check(err, "set generation arg 2");
-	err = clSetKernelArg(generation_k, 3, sizeof(s_cols), &s_cols);
+	err = clSetKernelArg(generation_k, 3, sizeof(s_rows), &s_rows);
 	ocl_check(err, "set generation arg 3");
+	err = clSetKernelArg(generation_k, 4, sizeof(s_cols), &s_cols);
+	ocl_check(err, "set generation arg 4");
 
 	cl_event wait_list[] = { init_evt };
 	err = clEnqueueNDRangeKernel(que, generation_k,
-		2, NULL, gws, NULL, /* griglia di lancio */
+		2, NULL, gws, lws, /* griglia di lancio */
 		1, wait_list, /* waiting list */
 		&generation_evt);
 	ocl_check(err, "enqueue kernel generation");
