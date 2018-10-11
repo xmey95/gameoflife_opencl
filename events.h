@@ -50,7 +50,7 @@ cl_event generation(cl_command_queue que,
 	ocl_check(err, "set generation arg 0");
 	err = clSetKernelArg(generation_k, 1, sizeof(d_src), &d_src);
 	ocl_check(err, "set generation arg 1");
-	err = clSetKernelArg(generation_k, 2, (lws[0]+2)*sizeof(cl_int), NULL);
+	err = clSetKernelArg(generation_k, 2, ((lws[0]+2)*(lws[1]+2))*sizeof(cl_int), NULL);
 	ocl_check(err, "set generation arg 2");
 	err = clSetKernelArg(generation_k, 3, sizeof(s_rows), &s_rows);
 	ocl_check(err, "set generation arg 3");

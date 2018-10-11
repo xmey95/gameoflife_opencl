@@ -75,19 +75,21 @@ kernel void generation(
 		const int pos = r*cols + c;
 		const int cache_pos = cache_r*cache_cols + cache_c;
 
-		cache[cache_pos] = r < rows && c < cols ? src[pos] : 0;
+		const bool inside = (r < rows && c < cols);
+
+		cache[cache_pos] = inside ? src[pos] : 0;
 
 		//Attributi dei vicini
 
 		uint8 neib_pos = (uint8){
-			r != 0 && r < rows ? pos - cols : UINT_MAX,
-			r != 0 && r < rows && c < cols - 1 ? pos - cols + 1 : UINT_MAX,
-			c < cols - 1 ? pos + 1 : UINT_MAX,
-			c < cols - 1 && r < rows - 1 ? pos + cols + 1 : UINT_MAX,
-			r < rows - 1 ? pos + cols : UINT_MAX,
-			r < rows - 1 && c != 0 && c < cols ? pos + cols - 1 : UINT_MAX,
-			c != 0 && c < cols ? pos - 1 : UINT_MAX,
-      c != 0 && r != 0 && c < cols && r < rows ? pos - cols - 1 : UINT_MAX,
+			inside && r != 0 ? pos - cols : UINT_MAX,
+			inside && r != 0 && c < cols - 1 ? pos - cols + 1 : UINT_MAX,
+			inside && c < cols - 1 ? pos + 1 : UINT_MAX,
+			inside && c < cols - 1 && r < rows - 1 ? pos + cols + 1 : UINT_MAX,
+			inside && r < rows - 1 ? pos + cols : UINT_MAX,
+			inside && r < rows - 1 && c != 0 ? pos + cols - 1 : UINT_MAX,
+			inside && c != 0 ? pos - 1 : UINT_MAX,
+      inside && c != 0 && r != 0 ? pos - cols - 1 : UINT_MAX,
 		};
 
 		int8 local_border_status = (int8){
@@ -139,7 +141,7 @@ kernel void generation(
 
 		barrier(CLK_LOCAL_MEM_FENCE);
 
-		if(r >= rows || c >= cols){
+		if(!inside){
 			return;
 		}
 

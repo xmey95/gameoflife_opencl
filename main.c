@@ -166,6 +166,8 @@ int main(int argc, char *argv[])
 		if(sides_after[2] == 1) rows++;
 		if(sides_after[3] == 1) rows++;
 
+		clEnqueueUnmapMemObject(que, sides, sides_after, 0, NULL, NULL);
+
 		memsize = sizeof(int)*rows*cols;
 
 		cl_mem new_mat;
