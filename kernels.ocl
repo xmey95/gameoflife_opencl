@@ -63,8 +63,6 @@ kernel void generation(
 		const int c = get_global_id(0);
 		const int r = get_global_id(1);
 
-		if (r < rows && c < cols){
-
 		const int local_c = get_local_id(0);
 		const int local_r = get_local_id(1);
 
@@ -77,19 +75,19 @@ kernel void generation(
 		const int pos = r*cols + c;
 		const int cache_pos = cache_r*cache_cols + cache_c;
 
-		cache[cache_pos] = src[pos];
+		cache[cache_pos] = r < rows && c < cols ? src[pos] : 0;
 
 		//Attributi dei vicini
 
 		uint8 neib_pos = (uint8){
-			r != 0 ? pos - cols : UINT_MAX,
-			r != 0 && c != cols - 1 ? pos - cols + 1 : UINT_MAX,
-			c != cols - 1 ? pos + 1 : UINT_MAX,
-			c != cols - 1 && r != rows - 1 ? pos + cols + 1 : UINT_MAX,
-			r != rows - 1 ? pos + cols : UINT_MAX,
-			r != rows - 1 && c != 0 ? pos + cols - 1 : UINT_MAX,
-			c != 0 ? pos - 1 : UINT_MAX,
-      c != 0 && r != 0 ? pos - cols - 1 : UINT_MAX,
+			r != 0 && r < rows ? pos - cols : UINT_MAX,
+			r != 0 && r < rows && c < cols - 1 ? pos - cols + 1 : UINT_MAX,
+			c < cols - 1 ? pos + 1 : UINT_MAX,
+			c < cols - 1 && r < rows - 1 ? pos + cols + 1 : UINT_MAX,
+			r < rows - 1 ? pos + cols : UINT_MAX,
+			r < rows - 1 && c != 0 && c < cols ? pos + cols - 1 : UINT_MAX,
+			c != 0 && c < cols ? pos - 1 : UINT_MAX,
+      c != 0 && r != 0 && c < cols && r < rows ? pos - cols - 1 : UINT_MAX,
 		};
 
 		int8 local_border_status = (int8){
@@ -114,32 +112,36 @@ kernel void generation(
 			cache_pos - cache_cols - 1
 		};
 
-		if(local_border_status.s0 && neib_pos.s0 != UINT_MAX){
-			cache[local_neib_pos.s0] = src[neib_pos.s0];
+		if(local_border_status.s0){
+			cache[local_neib_pos.s0] = neib_pos.s0 == UINT_MAX ? 0 : src[neib_pos.s0];
 		}
-		if(local_border_status.s1 && neib_pos.s1 != UINT_MAX){
-			cache[local_neib_pos.s1] = src[neib_pos.s1];
+		if(local_border_status.s1){
+			cache[local_neib_pos.s1] = neib_pos.s1 == UINT_MAX ? 0 : src[neib_pos.s1];
 		}
-		if(local_border_status.s2 && neib_pos.s2 != UINT_MAX){
-			cache[local_neib_pos.s2] = src[neib_pos.s2];
+		if(local_border_status.s2){
+			cache[local_neib_pos.s2] = neib_pos.s2 == UINT_MAX ? 0 : src[neib_pos.s2];
 		}
-		if(local_border_status.s3 && neib_pos.s3 != UINT_MAX){
-			cache[local_neib_pos.s3] = src[neib_pos.s3];
+		if(local_border_status.s3){
+			cache[local_neib_pos.s3] = neib_pos.s3 == UINT_MAX ? 0 : src[neib_pos.s3];
 		}
-		if(local_border_status.s4 && neib_pos.s4 != UINT_MAX){
-			cache[local_neib_pos.s4] = src[neib_pos.s4];
+		if(local_border_status.s4){
+			cache[local_neib_pos.s4] = neib_pos.s4 == UINT_MAX ? 0 : src[neib_pos.s4];
 		}
-		if(local_border_status.s5 && neib_pos.s5 != UINT_MAX){
-			cache[local_neib_pos.s5] = src[neib_pos.s5];
+		if(local_border_status.s5){
+			cache[local_neib_pos.s5] = neib_pos.s5 == UINT_MAX ? 0 : src[neib_pos.s5];
 		}
-		if(local_border_status.s6 && neib_pos.s6 != UINT_MAX){
-			cache[local_neib_pos.s6] = src[neib_pos.s6];
+		if(local_border_status.s6){
+			cache[local_neib_pos.s6] = neib_pos.s6 == UINT_MAX ? 0 : src[neib_pos.s6];
 		}
-		if(local_border_status.s7 && neib_pos.s7 != UINT_MAX){
-			cache[local_neib_pos.s7] = src[neib_pos.s7];
+		if(local_border_status.s7){
+			cache[local_neib_pos.s7] = neib_pos.s7 == UINT_MAX ? 0 : src[neib_pos.s7];
 		}
 
 		barrier(CLK_LOCAL_MEM_FENCE);
+
+		if(r >= rows || c >= cols){
+			return;
+		}
 
 		int cont=0;
 
@@ -167,7 +169,6 @@ kernel void generation(
 			else{
 				dst[r*cols + c] = 0;
 			}
-		}
 		}
 	}
 
