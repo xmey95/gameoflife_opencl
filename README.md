@@ -2,12 +2,12 @@
 
 ## Summary
 
-- [General](#General)
-- [Usage](#Usage)
-- [Implementation](#Implementation)
+- [General](#general)
+- [Usage](#usage)
+- [Implementation](#implementation)
 - [Generation Kernel](#GenerationKernel)
-- [Performance](#Performance)
-- [Notes](#Notes)
+- [Performance](#performance)
+- [Notes](#notes)
 
 ## General
 
