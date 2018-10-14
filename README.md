@@ -5,7 +5,7 @@
 - [General](#general)
 - [Usage](#usage)
 - [Implementation](#implementation)
-- [Generation Kernel](#GenerationKernel)
+- [Generation Kernel](#generation-kernel)
 - [Performance](#performance)
 - [Notes](#notes)
 
