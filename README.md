@@ -96,8 +96,7 @@ There are 2 different versions of the automaton, each one being more suited for 
 
 ## Performance
 
-The performance tests were performed on two completely different graphics cards: the **Nvidia GT940M** and the **Intel Graphic Card 520**. From the tests emerges as on the Nvidia card we have better results using the hardware cache or use a very large lws while on the intel card the best performances are only with a large lws.
-
+The performance tests were performed on two completely different graphics cards: the **Nvidia GT940M** and the **Intel Graphic Card 520**.
 The tests were done with a 2000x2000 matrix and the method to calculate throughput is:
 
     //Generation Kernel
@@ -108,6 +107,9 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
     //Where Expand Kernel
     (2.0*memsize)/runtime_ns(generation_evt)
+
+Both video cards have pros and cons; The NVIDIA card is better performing with the generation Kernel (using local memory makes it better with a high lws) and with the expansion Kernel using the _clEnqueueCopyBufferRect_ method while the Intel board is more performing with the Kernel Where Expand and with the expansion kernel that uses the method implemented to avoid the bug.
+As for throughput, the NVIDIA card is less efficient than the Intel on all Kernels except the Expansion Kernel that uses the _clEnqueueCopyBufferRect_ method. Using the local memory the Generation Kernel is better performing with lws 2 or using the default lws.
 
 ### Generation Kernel
 
