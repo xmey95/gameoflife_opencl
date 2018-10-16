@@ -2,12 +2,12 @@
 
 ## Summary
 
-- [General](#General)
-- [Usage](#Usage)
-- [Implementation](#Implementation)
-- [Expand and Where Expand Kernel](#GenerationKernel)
-- [Generation Kernel](#GenerationKernel)
-- [Performance](#Performance)
+- [General](#general)
+- [Usage](#usage)
+- [Implementation](#implementation)
+- [Expand and Where Expand Kernel](#expand-and-where-expand-kernel)
+- [Generation Kernel](#generation-kernel)
+- [Performance](#performance)
 
 ## General
 
@@ -45,7 +45,7 @@ _Diehard_ is a pattern that eventually disappears, rather than stabilizing, afte
 
 _Acorn_ takes 5206 generations to generate 633 cells, including 13 escaped gliders.
 
-![](./doc/acorn.svg)
+![](./doc/acorn.png)
 
 ## Usage
 
@@ -115,7 +115,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time.png)
+![](./doc/time_g.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -128,7 +128,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory.png)
+![](./doc/memory_g.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
@@ -143,7 +143,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time.png)
+![](./doc/time_l.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -156,7 +156,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory.png)
+![](./doc/memory_l.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
@@ -171,7 +171,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time.png)
+![](./doc/time_e.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -184,7 +184,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory.png)
+![](./doc/memory_e.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
@@ -201,7 +201,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time.png)
+![](./doc/time_e2.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -214,7 +214,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory.png)
+![](./doc/memory_e2.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
@@ -229,7 +229,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time.png)
+![](./doc/time_w.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -242,7 +242,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory.png)
+![](./doc/memory_w.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
