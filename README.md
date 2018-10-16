@@ -120,11 +120,11 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
 | No LWS | 3ms    | 15ms  |
-| 2      | 39ms   | 39ms  |
-| 4      | 10ms   | 11ms  |
-| 6      | 5ms    | 8ms   |
-| 8      | 3ms    | 7ms   |
-| 16     | 3ms    | 5ms   |
+| 2      | 5ms    | 7ms   |
+| 4      | 7ms    | 6ms   |
+| 6      | 5ms    | 13ms  |
+| 8      | 3ms    | 6ms   |
+| 16     | 3ms    | 8ms   |
 
 ##### Memory Throughput(GB/s)
 
@@ -132,12 +132,12 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
-| No LWS | 3GB/s  | 3GB/s  |
-| 2      | 3GB/s  | 4GB/s  |
-| 4      | 9GB/s  | 14GB/s |
-| 6      | 15GB/s | 24GB/s |
-| 8      | 18GB/s | 39GB/s |
-| 16     | 18GB/s | 39GB/s |
+| No LWS | 15GB/s | 33GB/s |
+| 2      | 9GB/s  | 29GB/s |
+| 4      | 9GB/s  | 32GB/s |
+| 6      | 9GB/s  | 32GB/s |
+| 8      | 20GB/s | 29GB/s |
+| 16     | 12GB/s | 33GB/s |
 
 #### Local Version
 
@@ -175,12 +175,12 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
-| No LWS | 3ms    | 15ms  |
-| 2      | 39ms   | 39ms  |
-| 4      | 10ms   | 11ms  |
-| 6      | 5ms    | 8ms   |
-| 8      | 3ms    | 7ms   |
-| 16     | 3ms    | 5ms   |
+| No LWS | 2.9ms  | 0.4ms |
+| 2      | 3ms    | 0.4ms |
+| 4      | 3ms    | 0.4ms |
+| 6      | 2.8ms  | 0.4ms |
+| 8      | 2.6ms  | 0.4ms |
+| 16     | 2.9ms  | 0.4ms |
 
 ##### Memory Throughput(GB/s)
 
@@ -188,12 +188,12 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
-| No LWS | 3GB/s  | 3GB/s  |
-| 2      | 3GB/s  | 4GB/s  |
-| 4      | 9GB/s  | 14GB/s |
-| 6      | 15GB/s | 24GB/s |
-| 8      | 18GB/s | 39GB/s |
-| 16     | 18GB/s | 39GB/s |
+| No LWS | 10GB/s | 65GB/s |
+| 2      | 11GB/s | 65GB/s |
+| 4      | 11GB/s | 64GB/s |
+| 6      | 11GB/s | 65GB/s |
+| 8      | 10GB/s | 65GB/s |
+| 16     | 10GB/s | 64GB/s |
 
 ### Expand Kernel
 
@@ -205,25 +205,25 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
-| No LWS | 3ms    | 15ms  |
-| 2      | 39ms   | 39ms  |
-| 4      | 10ms   | 11ms  |
-| 6      | 5ms    | 8ms   |
-| 8      | 3ms    | 7ms   |
-| 16     | 3ms    | 5ms   |
+| No LWS | 18ms   | 3ms   |
+| 2      | 2ms    | 3.8ms |
+| 4      | 1.7ms  | 3.5ms |
+| 6      | 2.1ms  | 3.5ms |
+| 8      | 3ms    | 3.7ms |
+| 16     | 2.7ms  | 3.7ms |
 
 ##### Memory Throughput(GB/s)
 
 ![](./doc/memory_e2.png)
 
-| LWS    | Nvidia | Intel  |
-| ------ | ------ | ------ |
-| No LWS | 3GB/s  | 3GB/s  |
-| 2      | 3GB/s  | 4GB/s  |
-| 4      | 9GB/s  | 14GB/s |
-| 6      | 15GB/s | 24GB/s |
-| 8      | 18GB/s | 39GB/s |
-| 16     | 18GB/s | 39GB/s |
+| LWS    | Nvidia | Intel |
+| ------ | ------ | ----- |
+| No LWS | 17GB/s | 8GB/s |
+| 2      | 16GB/s | 8GB/s |
+| 4      | 17GB/s | 9GB/s |
+| 6      | 15GB/s | 9GB/s |
+| 8      | 17GB/s | 8GB/s |
+| 16     | 16GB/s | 8GB/s |
 
 #### Version without clEnqueueCopyBufferRect
 
@@ -233,12 +233,12 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
-| No LWS | 3ms    | 15ms  |
-| 2      | 39ms   | 39ms  |
-| 4      | 10ms   | 11ms  |
-| 6      | 5ms    | 8ms   |
-| 8      | 3ms    | 7ms   |
-| 16     | 3ms    | 5ms   |
+| No LWS | 3ms    | 1.7ms |
+| 2      | 3.2ms  | 1.9ms |
+| 4      | 3ms    | 2ms   |
+| 6      | 3.2ms  | 1.8ms |
+| 8      | 3.5ms  | 1.8ms |
+| 16     | 3ms    | 1.9ms |
 
 ##### Memory Throughput(GB/s)
 
@@ -246,9 +246,9 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
-| No LWS | 3GB/s  | 3GB/s  |
-| 2      | 3GB/s  | 4GB/s  |
-| 4      | 9GB/s  | 14GB/s |
-| 6      | 15GB/s | 24GB/s |
-| 8      | 18GB/s | 39GB/s |
-| 16     | 18GB/s | 39GB/s |
+| No LWS | 10GB/s | 17GB/s |
+| 2      | 11GB/s | 16GB/s |
+| 4      | 10GB/s | 16GB/s |
+| 6      | 10GB/s | 17GB/s |
+| 8      | 19GB/s | 17GB/s |
+| 16     | 10GB/s | 16GB/s |
