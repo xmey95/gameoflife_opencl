@@ -171,7 +171,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time_e.png)
+![](./doc/time_w.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -184,7 +184,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory_e.png)
+![](./doc/memory_w.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
@@ -229,7 +229,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Time(ms)
 
-![](./doc/time_w.png)
+![](./doc/time_e.png)
 
 | LWS    | Nvidia | Intel |
 | ------ | ------ | ----- |
@@ -242,7 +242,7 @@ The tests were done with a 2000x2000 matrix and the method to calculate throughp
 
 ##### Memory Throughput(GB/s)
 
-![](./doc/memory_w.png)
+![](./doc/memory_e.png)
 
 | LWS    | Nvidia | Intel  |
 | ------ | ------ | ------ |
