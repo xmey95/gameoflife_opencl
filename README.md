@@ -2,12 +2,12 @@
 
 ## Summary
 
-- [General](#general)
-- [Usage](#usage)
-- [Implementation](#implementation)
-- [Generation Kernel](#generation-kernel)
-- [Performance](#performance)
-- [Notes](#notes)
+- [General](#General)
+- [Usage](#Usage)
+- [Implementation](#Implementation)
+- [Expand and Where Expand Kernel](#GenerationKernel)
+- [Generation Kernel](#GenerationKernel)
+- [Performance](#Performance)
 
 ## General
 
@@ -75,6 +75,14 @@ This implementation of the Game of life is written using ANSI C for the host(CPU
 - **_expand_** kernel creates a new grid where sides indicated by where_expand are expanded.
 - **_generation_** kernel is the core of the project and execute rules for forward the generation.
 
+## Expand and Where Expand Kernel
+
+The **_where_expand_** kernel examines the matrix along the edges and checks if, for each of its sides, there is at least one automaton, and writes the result of the scan into a buffer. This buffer is passed by parameter to the **_expand_** kernel which will initiate a new matrix by adding the rows and columns needed for expansion. The values in the matrix will be the same as in the previous while the cells in the additional rows and columns will be initialized with the value 0.
+
+#### Bug found
+
+To make the expansion procedure more optimized, the **_clEnqueueCopyBufferRect_** method was used, which initializes the whole new matrix with zero values and then, by choosing the sub-array of the just initialized matrix, writes the values of the old, smaller matrix inside of the submatrix. However, the _clEnqueueCopyBufferRect_ method presents a bug when allocating memory on the _Intel HD Graphics 520_ graphics card and has the segmentation fault. To work around this problem, the option **_i_** has been made available which initializes the new matrix using a method that writes the values within the new matrix one by one instead of using the _clEnqueueCopyBufferRect_ method.
+
 ## Generation Kernel
 
 This is the core of the algorithm, as it computes the generation change.
@@ -89,6 +97,21 @@ There are 2 different versions of the automaton, each one being more suited for 
 ## Performance
 
 The performance tests were performed on two completely different graphics cards: the **Nvidia GT940M** and the **Intel Graphic Card 520**. From the tests emerges as on the Nvidia card we have better results using the hardware cache or use a very large lws while on the intel card the best performances are only with a large lws.
+
+The tests were done with a 2000x2000 matrix and the method to calculate throughput is:
+
+    //Generation Kernel
+    (10.0*memsize)/runtime_ns(generation_evt)
+
+    //Expand Kernel
+    (2.0*memsize)/runtime_ns(generation_evt)
+
+    //Where Expand Kernel
+    (2.0*memsize)/runtime_ns(generation_evt)
+
+### Generation Kernel
+
+#### Global Version
 
 ##### Time(ms)
 
@@ -116,6 +139,116 @@ The performance tests were performed on two completely different graphics cards:
 | 8      | 18GB/s | 39GB/s |
 | 16     | 18GB/s | 39GB/s |
 
-## Notes
+#### Local Version
 
-A bug was found with the _clEnqueueBufferRect()_ method using the Intel video card. The bug corrupts the mishandling of allocation resources and goes into segmentation fault. To avoid this bug, instead of using the _clEnqueueBufferRect()_ method, a method has been developed that loads the host array to the GPU. The i option enable this method.
+##### Time(ms)
+
+![](./doc/time.png)
+
+| LWS    | Nvidia | Intel |
+| ------ | ------ | ----- |
+| No LWS | 3ms    | 15ms  |
+| 2      | 39ms   | 39ms  |
+| 4      | 10ms   | 11ms  |
+| 6      | 5ms    | 8ms   |
+| 8      | 3ms    | 7ms   |
+| 16     | 3ms    | 5ms   |
+
+##### Memory Throughput(GB/s)
+
+![](./doc/memory.png)
+
+| LWS    | Nvidia | Intel  |
+| ------ | ------ | ------ |
+| No LWS | 3GB/s  | 3GB/s  |
+| 2      | 3GB/s  | 4GB/s  |
+| 4      | 9GB/s  | 14GB/s |
+| 6      | 15GB/s | 24GB/s |
+| 8      | 18GB/s | 39GB/s |
+| 16     | 18GB/s | 39GB/s |
+
+### Where Expand Kernel
+
+##### Time(ms)
+
+![](./doc/time.png)
+
+| LWS    | Nvidia | Intel |
+| ------ | ------ | ----- |
+| No LWS | 3ms    | 15ms  |
+| 2      | 39ms   | 39ms  |
+| 4      | 10ms   | 11ms  |
+| 6      | 5ms    | 8ms   |
+| 8      | 3ms    | 7ms   |
+| 16     | 3ms    | 5ms   |
+
+##### Memory Throughput(GB/s)
+
+![](./doc/memory.png)
+
+| LWS    | Nvidia | Intel  |
+| ------ | ------ | ------ |
+| No LWS | 3GB/s  | 3GB/s  |
+| 2      | 3GB/s  | 4GB/s  |
+| 4      | 9GB/s  | 14GB/s |
+| 6      | 15GB/s | 24GB/s |
+| 8      | 18GB/s | 39GB/s |
+| 16     | 18GB/s | 39GB/s |
+
+### Expand Kernel
+
+#### Version with clEnqueueCopyBufferRect
+
+##### Time(ms)
+
+![](./doc/time.png)
+
+| LWS    | Nvidia | Intel |
+| ------ | ------ | ----- |
+| No LWS | 3ms    | 15ms  |
+| 2      | 39ms   | 39ms  |
+| 4      | 10ms   | 11ms  |
+| 6      | 5ms    | 8ms   |
+| 8      | 3ms    | 7ms   |
+| 16     | 3ms    | 5ms   |
+
+##### Memory Throughput(GB/s)
+
+![](./doc/memory.png)
+
+| LWS    | Nvidia | Intel  |
+| ------ | ------ | ------ |
+| No LWS | 3GB/s  | 3GB/s  |
+| 2      | 3GB/s  | 4GB/s  |
+| 4      | 9GB/s  | 14GB/s |
+| 6      | 15GB/s | 24GB/s |
+| 8      | 18GB/s | 39GB/s |
+| 16     | 18GB/s | 39GB/s |
+
+#### Version without clEnqueueCopyBufferRect
+
+##### Time(ms)
+
+![](./doc/time.png)
+
+| LWS    | Nvidia | Intel |
+| ------ | ------ | ----- |
+| No LWS | 3ms    | 15ms  |
+| 2      | 39ms   | 39ms  |
+| 4      | 10ms   | 11ms  |
+| 6      | 5ms    | 8ms   |
+| 8      | 3ms    | 7ms   |
+| 16     | 3ms    | 5ms   |
+
+##### Memory Throughput(GB/s)
+
+![](./doc/memory.png)
+
+| LWS    | Nvidia | Intel  |
+| ------ | ------ | ------ |
+| No LWS | 3GB/s  | 3GB/s  |
+| 2      | 3GB/s  | 4GB/s  |
+| 4      | 9GB/s  | 14GB/s |
+| 6      | 15GB/s | 24GB/s |
+| 8      | 18GB/s | 39GB/s |
+| 16     | 18GB/s | 39GB/s |
